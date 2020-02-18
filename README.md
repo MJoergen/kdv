@@ -32,7 +32,7 @@ whose solution is a=-1/12, b=2/3, c=0, d=-2/3, and e=1/12.  So the first order
 derivative can be approximated by:
 
 ```
-dx\*u\_x = {-u[n+2] + 8\*u[n+1] - 8\*u[n-1] + u[n-2]}/12
+dx*u_x = (-u[n+2] + 8*u[n+1] - 8*u[n-1] + u[n-2])/12
 ```
 
 However, the above equation only works for points well inside the region of
@@ -44,7 +44,7 @@ So we will also consider an equations of the forms:
 By following a similar procedure we arrive at the following results:
  
 ```
-dx\*u\_x = {u[n+3] - 6\*u[n+2] + 18\*u[n+1] - 10\*u[n] - 3\*u[n-1]}/12
-dx\*u\_x = {-3\*u[n+4] + 16\*u[n+3] - 36\*u[n+2] + 48\*u[n+1] - 25\*u[n]}/12
+dx*u_x = (u[n+3] - 6*u[n+2] + 18*u[n+1] - 10*u[n] - 3*u[n-1])/12
+dx*u_x = (-3*u[n+4] + 16*u[n+3] - 36*u[n+2] + 48*u[n+1] - 25*u[n])/12
 ```
 
