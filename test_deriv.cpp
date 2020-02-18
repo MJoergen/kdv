@@ -1,30 +1,32 @@
 #include <vector>
 #include <iostream>
 
+// Just a convenient shorthand.
 typedef std::vector<double> dv;
 
 // This calculates the spatial first derivative.
 // The coefficients are chosen such that an arbitrary fourth degree polynomial
 // gives the exact result.
-void calc_x1(dv& x1, const dv& x)
+void calc_deriv_1(dv& x1, const dv& x)
 {
    const unsigned int len = x.size();
    x1[0] = (-3.0*x[4] + 16.0*x[3] - 36.0*x[2] + 48.0*x[1] - 25.0*x[0])/12.0;
    x1[1] = (     x[4] -  6.0*x[3] + 18.0*x[2] - 10.0*x[1] -  3.0*x[0])/12.0;
 
-   x1[len-2] = (-x[len-5] + 6.0*x[len-4] - 18.0*x[len-3] + 10.0*x[len-2] + 3.0*x[len-1])/12.0;
+   x1[len-2] = (   -x[len-5] +  6.0*x[len-4] - 18.0*x[len-3] + 10.0*x[len-2] +  3.0*x[len-1])/12.0;
    x1[len-1] = (3.0*x[len-5] - 16.0*x[len-4] + 36.0*x[len-3] - 48.0*x[len-2] + 25.0*x[len-1])/12.0;
 
    for (unsigned int i=2; i<len-2; ++i)
    {
       x1[i] = (-x[i+2] + 8.0*x[i+1] - 8.0*x[i-1] + x[i-2])/12.0;
    }
-} // end of calc_x1
+} // end of calc_deriv_1
+
 
 // This calculates the spatial second derivative.
 // The coefficients are chosen such that an arbitrary fourth degree polynomial
 // gives the exact result.
-void calc_x2(dv& x2, const dv& x)
+void calc_deriv_2(dv& x2, const dv& x)
 {
    const unsigned int len = x.size();
    x2[0] = (11.0*x[4] - 56.0*x[3] + 114.0*x[2] - 104.0*x[1] + 35.0*x[0])/12.0;
@@ -37,12 +39,13 @@ void calc_x2(dv& x2, const dv& x)
    {
       x2[i] = (-x[i+2] + 16.0*x[i+1] - 30*x[i] + 16.0*x[i-1] - x[i-2])/12.0;
    }
-} // end of calc_x2
+} // end of calc_deriv_2
+
 
 // This calculates the spatial third derivative.
 // The coefficients are chosen such that an arbitrary fourth degree polynomial
 // gives the exact result.
-void calc_x3(dv& x2, const dv& x)
+void calc_deriv_3(dv& x2, const dv& x)
 {
    const unsigned int len = x.size();
    x2[0] = (-3.0*x[4] + 14.0*x[3] - 24.0*x[2] + 18.0*x[1] - 5.0*x[0])*0.5;
@@ -55,37 +58,57 @@ void calc_x3(dv& x2, const dv& x)
    {
       x2[i] = (x[i+2] - 2.0*x[i+1] + 2.0*x[i-1] - x[i-2])*0.5;
    }
-} // end of calc_x3
+} // end of calc_deriv_3
+
 
 int main()
 {
    const unsigned int len = 10;
-   dv x(len);
-   dv xt(len);
+   dv x(len);        // Input vector
+   dv x1(len);       // Calculated first derivative
+   dv x2(len);       // Calculated second derivative
+   dv x3(len);       // Calculated third derivative
+   dv exp_x1(len);   // Expected first derivative
+   dv exp_x2(len);   // Expected second derivative
+   dv exp_x3(len);   // Expected third derivative
 
+   // Define the parameters of an arbitrary fourth degree polynomial
+   double a = 7.0;
+   double b = 6.0;
+   double c = 5.0;
+   double d = 4.0;
+   double e = 3.0;
+
+   // Prepare for test
    for (unsigned int i=0; i<len; ++i)
    {
-      x[i] = 7.0*i*i*i*i + 6.0*i*i*i + 3.0*i*i + 4.0*i + 5.0; // arbitrary fourth degree polynomial
+      x[i]      =    a*i*i*i*i +   b*i*i*i +   c*i*i + d*i + e;  // arbitrary fourth degree polynomial
+      exp_x1[i] =  4*a*i*i*i   + 3*b*i*i   + 2*c*i   + d;        // First derivative
+      exp_x2[i] = 12*a*i*i     + 6*b*i     + 2*c;                // Second derivative
+      exp_x3[i] = 24*a*i       + 6*b;                            // Third derivative
    }
+   calc_deriv_1(x1,x);
+   calc_deriv_2(x2,x);
+   calc_deriv_3(x3,x);
 
-   calc_x1(xt,x);
+   std::cout << "Verifying first derivative:" << std::endl;
    for (unsigned int i=0; i<len; ++i)
    {
-      std::cout << xt[i] << ", err=" << xt[i] - (28.0*i*i*i+18.0*i*i+6.0*i+4.0) << std::endl; 
+      std::cout << x1[i] << ", err=" << x1[i] - exp_x1[i] << std::endl; 
    }
    std::cout << std::endl;
 
-   calc_x2(xt,x);
+   std::cout << "Verifying second derivative:" << std::endl;
    for (unsigned int i=0; i<len; ++i)
    {
-      std::cout << xt[i] << ", err=" << xt[i] - (84.0*i*i+36*i+6.0) << std::endl; 
+      std::cout << x2[i] << ", err=" << x2[i] - exp_x2[i] << std::endl; 
    }
    std::cout << std::endl;
 
-   calc_x3(xt,x);
+   std::cout << "Verifying third derivative:" << std::endl;
    for (unsigned int i=0; i<len; ++i)
    {
-      std::cout << xt[i] << ", err=" << xt[i] - (168.0*i+36) << std::endl; 
+      std::cout << x3[i] << ", err=" << x3[i] - exp_x3[i] << std::endl; 
    }
    std::cout << std::endl;
 }
