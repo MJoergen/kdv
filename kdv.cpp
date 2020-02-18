@@ -39,18 +39,23 @@ int main()
 {
    const unsigned int len = 10;
    dv x(len);
+   dv xt(len);
+
    for (unsigned int i=0; i<len; ++i)
    {
-      x[i] = 6.0*i*i*i+3.0*i*i+4.0*i+5.0;
+      x[i] = 3.0*i*i+4.0*i+5.0;  // arbitrary second degree polynomial
    }
-
-   dv xt(len);
    calc_x1(xt,x);
    for (unsigned int i=0; i<len; ++i)
    {
-      std::cout << xt[i] << ", err=" << xt[i] - (18.0*i*i+6.0*i+4.0) << std::endl; 
+      std::cout << xt[i] << ", err=" << xt[i] - (6.0*i+4.0) << std::endl; 
    }
+   std::cout << std::endl;
 
+   for (unsigned int i=0; i<len; ++i)
+   {
+      x[i] = 6.0*i*i*i+3.0*i*i+4.0*i+5.0; // arbitrary third degree polynomial
+   }
    calc_x2(xt,x);
    for (unsigned int i=0; i<len; ++i)
    {
