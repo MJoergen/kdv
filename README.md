@@ -61,8 +61,8 @@ To approximate the third spatial derivative, we follow the same procedure
 and arrive at the following set of equations:
 
 ```
-dx^3*u_xxx = (6u[n+2] - 12*u[n+1] + 12*u[n-1] - 6u[n-2])/12
-dx^3*u_xxx = (-6u[n+3] + 36*u[n+2] - 72*u[n+1] + 60*u[n] - 18*u[n-1])/12
-dx^3*u_xxx = (-18*u[n+4] + 84*u[n+3] - 144*u[n+2] + 108*u[n+1] - 30*u[n])/12
+dx^3*u_xxx = (u[n+2] - 2*u[n+1] + 2*u[n-1] - u[n-2])/2
+dx^3*u_xxx = (-u[n+3] + 6*u[n+2] - 12*u[n+1] + 10*u[n] - 3*u[n-1])/2
+dx^3*u_xxx = (-3*u[n+4] + 14*u[n+3] - 24*u[n+2] + 18*u[n+1] - 5*u[n])/2
 ```
 
