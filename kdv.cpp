@@ -1,5 +1,5 @@
-#include <vector>
 #include <iostream>
+#include <iomanip>
 #include <math.h>
 
 #include "deriv.h"
@@ -16,14 +16,20 @@ int main()
    const double tmax = 20.0;
 
    // The values below control the accuracy of the calculations.
-   const double dx = 0.01;
-   const double dt = 0.01;
+   const double dx = 0.1;
+   const double dt = 0.1;
+
+//   // This function defines the initial condition.
+//   auto u0 = [&] (double x)
+//   {
+//      double c = cosh((x-(xmax/2.0)) / 2.0);
+//      return -0.5/(c*c);
+//   };
 
    // This function defines the initial condition.
    auto u0 = [&] (double x)
    {
-      double c = cosh((x-(xmax/2.0)) / 2.0);
-      return -0.5/(c*c);
+      return 1.0/(x+1.0);
    };
 
    // This function defines the partial differential equation
@@ -35,6 +41,13 @@ int main()
       calc_deriv_3(ut, u);
       for (unsigned int n=0; n<u.size(); ++n)
       {
+         double x = n*dx;
+         std::cout <<    "x="  << std::setw(8) << std::setprecision(4) << x
+                   << " , u="  << std::setw(8) << u[n]
+                   << " , u1=" << std::setw(8) << u1[n]/dx
+                   << " , u3=" << std::setw(8) << ut[n]/(dx*dx*dx)
+                   << std::endl;
+
          ut[n] = -ut[n]/(dx*dx*dx) + 6.0*u[n]*u1[n]/dx;
       }
    }; // calc_ut
@@ -55,18 +68,24 @@ int main()
    }
 
    dv ut(nmax+1);
+   // Simple Euler method.
    for (unsigned int m=0; m<=mmax; ++m)
    {
       calc_ut(ut, u);
       for (unsigned int n=0; n<=nmax; ++n)
       {
          double x = n*dx;
-         std::cout << "x=" << x << " , u=" << u[n] << " , ut=" << ut[n] << std::endl;
+         std::cout <<    "x="  << std::setw(8) << std::setprecision(4) << x
+                   << " , u="  << std::setw(8) << u[n]
+                   << " , ut=" << std::setw(8) << ut[n]
+                   << std::endl;
+      }
+
+      for (unsigned int n=0; n<=nmax; ++n)
+      {
          u[n] += ut[n]*dt;
       }
-      break;
    }
-
 
    return 0;
 } // main
