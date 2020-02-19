@@ -26,7 +26,7 @@ where of course the function u0(x) satisfies the boundary condition too.
 The numerical simulations we will perform here are based on a given
 initial function u0(x), and solving the partial differential equation
 numerically to determine how the solution function u(x,t) evolves as time
-t increases.
+t increases from t=0.
 
 In order to perform numerical simulations, we will discretize (sample) the
 function u(x,t) at regular intervals dx and dt, where the values dx and dt are
@@ -40,7 +40,7 @@ into a finite difference equation, discrete in both x and t, and then
 to talk about how to actually solve the resulting finite difference.
 
 Next we need to discuss how to verify the error introduced by the finite
-difference equation, and how to choose appropriate values of x and t.
+difference equation, and how to choose appropriate values of dx and dt.
 
 
 ## Discretizing
