@@ -1,5 +1,5 @@
-test_deriv: test_deriv.cpp 
+kdv: kdv.cpp deriv.cpp
 	g++ $^ -o $@
 
 clean:
-	rm -f test_deriv
+	rm -f kdv
