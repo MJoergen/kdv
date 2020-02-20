@@ -54,7 +54,7 @@ int main()
       return sum;
    }; // calc_mass
 
-   // This function calculates the mass
+   // This function calculates the momentum
    auto calc_momentum = [&] (const dv& u)
    {
       double sum = 0.0;
