@@ -13,7 +13,7 @@ int main()
 
    // The values below determine the region of interest.
    const double xmax = 40.0;
-   const double tmax = 1.0;
+   const double tmax = 0.9;
 
    // The values below control the accuracy of the calculations.
    const double dx = 0.1;
@@ -65,6 +65,10 @@ int main()
       return sum;
    }; // calc_momentum
 
+   // Initial values of mass and momentum
+   const double exp_mass     = -20.0;
+   const double exp_momentum = 20.0/3.0;
+
    //
    // CUSTOMIZABLE AREA ENDS HERE ^^^
    //
@@ -90,9 +94,9 @@ int main()
       calc_ut(ut, u);
 
       const double t = m*dt;
-#if 0
       if ((m%(mmax/1000)) == 0)
       {
+#if 0
          for (unsigned int n=0; n<=nmax; ++n)
          {
             const double x = n*dx;
@@ -105,13 +109,14 @@ int main()
          std::cout << "Mass     = " << calc_mass(u)     << std::endl;
          std::cout << "Momentum = " << calc_momentum(u) << std::endl;
          std::cout << std::endl;
-      }
 #endif
 
-      std::cout << std::setw(9) << std::setprecision(4) << t
-       << " , " << std::setw(9) << std::setprecision(4) << calc_mass(u) + 20.0
-       << " , " << std::setw(9) << std::setprecision(4) << calc_momentum(u) - 20.0/3.0
-       << std::endl;
+         // Output error in conserved quantities.
+         std::cout << std::setw(9) << std::setprecision(4) << t
+          << " , " << std::setw(9) << std::setprecision(4) << calc_mass(u)     - exp_mass
+          << " , " << std::setw(9) << std::setprecision(4) << calc_momentum(u) - exp_momentum
+          << std::endl;
+      }
 
       for (unsigned int n=0; n<=nmax; ++n)
       {
