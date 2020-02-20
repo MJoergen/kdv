@@ -13,7 +13,7 @@ int main()
 
    // The values below determine the region of interest.
    const double xmax = 40.0;
-   const double tmax = 10.0;
+   const double tmax = 1.0;
 
    // The values below control the accuracy of the calculations.
    const double dx = 0.1;
@@ -22,21 +22,10 @@ int main()
    // This function defines the initial condition.
    auto u0 = [&] (double x)
    {
-      // Boundary values must be handled separately.
-      if (x<=0.0 || x>=xmax)
-         return 0.0;
-
-      // This transforms linearly from [0 .. xmax] to [-1 .. 1].
-      const double s = 2.0*x/xmax-1.0;
-
-      // This determines the amount of stretching.
-      const unsigned int STRETCH = 8;
-
-      // This transforms nonlinearly from [-1 .. 1] to [-infinity .. infinity].
-      const double t = s/(1-pow(s,STRETCH))*xmax*0.5;
+      const double xmid = xmax/2.0;
 
       // Temporary variable.
-      const double c = cosh(t / 2.0);
+      const double c = cosh((x-xmid) / 2.0);
 
       return -0.5/(c*c);
    };
@@ -54,19 +43,44 @@ int main()
       }
    }; // calc_ut
 
+   // This function calculates the mass
+   auto calc_mass = [&] (const dv& u)
+   {
+      double sum = 0.0;
+      for (unsigned int n=0; n<u.size(); ++n)
+      {
+         sum += u[n];
+      }
+      return sum;
+   }; // calc_mass
+
+   // This function calculates the mass
+   auto calc_momentum = [&] (const dv& u)
+   {
+      double sum = 0.0;
+      for (unsigned int n=0; n<u.size(); ++n)
+      {
+         sum += u[n]*u[n];
+      }
+      return sum;
+   }; // calc_momentum
+
    //
    // CUSTOMIZABLE AREA ENDS HERE ^^^
    //
 
 
-   const unsigned int nmax = xmax/dx;
-   const unsigned int mmax = tmax/dt;
+   const unsigned int nmax = xmax/dx + 0.5;  // Add 0.5 for rounding.
+   const unsigned int mmax = tmax/dt + 0.5;  // Add 0.5 for rounding.
 
+   // Prepare initial condition.
+   // Make sure initial values are (approximately) periodic, even though the
+   // function u0() is not.
    dv u(nmax+1);
    for (unsigned int n=0; n<=nmax; ++n)
    {
       const double x = n*dx;
-      u[n] = u0(x);
+      u[n] = u0(x) + u0(x-xmax) + u0(x+xmax);
    }
 
    dv ut(nmax+1);
@@ -75,20 +89,29 @@ int main()
    {
       calc_ut(ut, u);
 
+      const double t = m*dt;
+#if 0
       if ((m%(mmax/1000)) == 0)
       {
-         const double t = m*dt;
          for (unsigned int n=0; n<=nmax; ++n)
          {
             const double x = n*dx;
-            std::cout <<    "t="  << std::setw(8) << std::setprecision(4) << t
-               << " , x="  << std::setw(8) << std::setprecision(4) << x
-               << " , u="  << std::setw(8) << u[n]
-               << " , ut=" << std::setw(8) << ut[n]
-               << std::endl;
+            std::cout <<    "t="  << std::setw(9) << std::setprecision(4) << t
+                      << " , x="  << std::setw(9) << std::setprecision(4) << x
+                      << " , u="  << std::setw(9) << u[n]
+                      << " , ut=" << std::setw(9) << ut[n]
+                      << std::endl;
          }
+         std::cout << "Mass     = " << calc_mass(u)     << std::endl;
+         std::cout << "Momentum = " << calc_momentum(u) << std::endl;
          std::cout << std::endl;
       }
+#endif
+
+      std::cout << std::setw(9) << std::setprecision(4) << t
+       << " , " << std::setw(9) << std::setprecision(4) << calc_mass(u) + 20.0
+       << " , " << std::setw(9) << std::setprecision(4) << calc_momentum(u) - 20.0/3.0
+       << std::endl;
 
       for (unsigned int n=0; n<=nmax; ++n)
       {

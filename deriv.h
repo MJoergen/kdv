@@ -1,8 +1,18 @@
 #include <vector>
 #include <iostream>
 
+// The functions in this block calculate the first, second, and third
+// derivative of a function sampled at equidistant points.
+// The function is assumed to be periodic, meaning that x[len] = x[0], where
+// len is the number of elements in the vector x.
+
+// The functions all make use of a five point stencil, as explained here:
+// https://en.wikipedia.org/wiki/Five-point_stencil
+
+
 // Just a convenient shorthand.
 typedef std::vector<double> dv;
+
 
 // This calculates the spatial first derivative.
 void calc_deriv_1(dv& x1, const dv& x);
