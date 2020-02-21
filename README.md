@@ -93,3 +93,7 @@ value of the sums should not change. This is a way to monitor the correctness
 of the calculation, including monitoring the errors introduced by the discrete
 sampling in x and t.
 
+## Numerical integration of the partial differential equation.
+It is well known that the simple Euler's method has serious problems with
+numerical stability, so instead we will make use of [Heun's
+method](https://en.wikipedia.org/wiki/Heun%27s_method).

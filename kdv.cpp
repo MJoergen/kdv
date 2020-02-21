@@ -1,5 +1,7 @@
 #include <iostream>
+#include <fstream>
 #include <iomanip>
+#include <string>
 #include <math.h>
 
 #include "deriv.h"
@@ -13,7 +15,7 @@ int main()
 
    // The values below determine the region of interest.
    const double xmax = 40.0;
-   const double tmax = 0.9;
+   const double tmax = 100.0;
 
    // The values below control the accuracy of the calculations.
    const double dx = 0.1;
@@ -77,6 +79,8 @@ int main()
    const unsigned int nmax = xmax/dx + 0.5;  // Add 0.5 for rounding.
    const unsigned int mmax = tmax/dt + 0.5;  // Add 0.5 for rounding.
 
+   const std::string file_name_base = "kdv_out";
+
    // Prepare initial condition.
    // Make sure initial values are (approximately) periodic, even though the
    // function u0() is not.
@@ -87,40 +91,40 @@ int main()
       u[n] = u0(x) + u0(x-xmax) + u0(x+xmax);
    }
 
-   dv ut(nmax+1);
-   // Simple Euler method.
+   dv f(nmax+1);
+   dv utmp(nmax+1);
+   dv ftmp(nmax+1);
+   std::ofstream oflog(file_name_base + ".txt");
    for (unsigned int m=0; m<=mmax; ++m)
    {
-      calc_ut(ut, u);
-
       const double t = m*dt;
       if ((m%(mmax/1000)) == 0)
       {
-#if 0
+         // Output error in conserved quantities.
+         oflog <<          std::setw(19) << std::setprecision(4) << t
+               << " , " << std::setw(19) << std::setprecision(4) << calc_mass(u)     - exp_mass
+               << " , " << std::setw(19) << std::setprecision(4) << calc_momentum(u) - exp_momentum
+               << std::endl;
+
+         std::ofstream ofs(file_name_base + std::to_string(t) + ".txt");
          for (unsigned int n=0; n<=nmax; ++n)
          {
             const double x = n*dx;
-            std::cout <<    "t="  << std::setw(9) << std::setprecision(4) << t
-                      << " , x="  << std::setw(9) << std::setprecision(4) << x
-                      << " , u="  << std::setw(9) << u[n]
-                      << " , ut=" << std::setw(9) << ut[n]
-                      << std::endl;
+            ofs <<          std::setw(19) << std::setprecision(4) << x
+                << " , " << std::setw(19) << std::setprecision(4) << u[n] << std::endl;
          }
-         std::cout << "Mass     = " << calc_mass(u)     << std::endl;
-         std::cout << "Momentum = " << calc_momentum(u) << std::endl;
-         std::cout << std::endl;
-#endif
-
-         // Output error in conserved quantities.
-         std::cout << std::setw(9) << std::setprecision(4) << t
-          << " , " << std::setw(9) << std::setprecision(4) << calc_mass(u)     - exp_mass
-          << " , " << std::setw(9) << std::setprecision(4) << calc_momentum(u) - exp_momentum
-          << std::endl;
       }
 
+      // Heun's method.
+      calc_ut(f, u);
       for (unsigned int n=0; n<=nmax; ++n)
       {
-         u[n] += ut[n]*dt;
+         utmp[n] = u[n] + dt*f[n];
+      }
+      calc_ut(ftmp, utmp);
+      for (unsigned int n=0; n<=nmax; ++n)
+      {
+         u[n] = u[n] + dt/2.0*(f[n]+ftmp[n]);
       }
    }
 
