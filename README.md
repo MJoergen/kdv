@@ -84,8 +84,8 @@ Due to the discrete sampling in x, we will instead consider the following
 two sums:
 
 ```
-mass     = sum_{n=0}^M u[n,m]
-momentum = sum_{n=0}^M u[n,m] * u[n,m]
+mass     = sum_{n=0}^N u[n,m]
+momentum = sum_{n=0}^N u[n,m] * u[n,m]
 ```
 
 These two sums can be evaluated for every value m. According to the above, the
