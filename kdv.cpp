@@ -14,12 +14,12 @@ int main()
    //
 
    // The values below determine the region of interest.
-   const double xmax = 40.0;
-   const double tmax = 100.0;
+   const double xmax = 100.0;
+   const double tmax = 10.0;
 
    // The values below control the accuracy of the calculations.
-   const double dx = 0.1;
-   const double dt = 0.00001;
+   const double dx = 0.05;
+   const double dt = 0.000001;
 
    // This function defines the initial condition.
    auto u0 = [&] (double x)
@@ -68,8 +68,11 @@ int main()
    }; // calc_momentum
 
    // Initial values of mass and momentum
-   const double exp_mass     = -20.0;
-   const double exp_momentum = 20.0/3.0;
+   const double exp_mass     = -2.0;
+   const double exp_momentum = 2.0/3.0;
+
+   // Output file name prefix
+   const std::string file_name_base = "kdv_out";
 
    //
    // CUSTOMIZABLE AREA ENDS HERE ^^^
@@ -78,8 +81,6 @@ int main()
 
    const unsigned int nmax = xmax/dx + 0.5;  // Add 0.5 for rounding.
    const unsigned int mmax = tmax/dt + 0.5;  // Add 0.5 for rounding.
-
-   const std::string file_name_base = "kdv_out";
 
    // Prepare initial condition.
    // Make sure initial values are (approximately) periodic, even though the
@@ -98,12 +99,12 @@ int main()
    for (unsigned int m=0; m<=mmax; ++m)
    {
       const double t = m*dt;
-      if ((m%(mmax/1000)) == 0)
+      if ((m%(mmax/100)) == 0)
       {
          // Output error in conserved quantities.
          oflog <<          std::setw(19) << std::setprecision(4) << t
-               << " , " << std::setw(19) << std::setprecision(4) << calc_mass(u)     - exp_mass
-               << " , " << std::setw(19) << std::setprecision(4) << calc_momentum(u) - exp_momentum
+               << " , " << std::setw(19) << std::setprecision(4) << dx*calc_mass(u)     - exp_mass
+               << " , " << std::setw(19) << std::setprecision(4) << dx*calc_momentum(u) - exp_momentum
                << std::endl;
 
          std::ofstream ofs(file_name_base + std::to_string(t) + ".txt");
