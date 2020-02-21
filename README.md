@@ -76,3 +76,20 @@ dx^2*u_xx  = (-u[n+2] + 16*u[n+1] - 30*u[n] + 16*u[n-1] - u[n-2])/12
 dx^3*u_xxx = ( u[n+2] -  2*u[n+1] +            2*u[n-1] - u[n-2])/2
 ```
 
+## Conserved quantities
+Certain definite integrals over x involving u(x,t) turn out to be
+independent of time. Two such are the integral of u and the integral of u^2.
+
+Due to the discrete sampling in x, we will instead consider the following
+two sums:
+
+```
+mass     = sum_{n=0}^M u[n,m]
+momentum = sum_{n=0}^M u[n,m] * u[n,m]
+```
+
+These two sums can be evaluated for every value m. According to the above, the
+value of the sums should not change. This is a way to monitor the correctness
+of the calculation, including monitoring the errors introduced by the discrete
+sampling in x and t.
+
