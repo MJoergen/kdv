@@ -20,8 +20,10 @@ class KdvIntegrator : public IntegratorBase
 
       void calc_ut(dv& ut, const dv& u);
       void single_step(double t, dv& u);
+      void initialize(dv& u);
 
    private:
+      double u0(double x) const;
       double calc_mass(const dv& u) const;
       double calc_momentum(const dv& u) const;
       void log(double t, const dv& u);

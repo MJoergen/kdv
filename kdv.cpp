@@ -4,11 +4,13 @@
 #include <getopt.h>
 #include "kdvintegrator.h"
 
-const double C_DEFAULT_XMAX = 50.0;
-const double C_DEFAULT_TMAX = 10.0;
-const double C_DEFAULT_DX   = 0.1;
-const double C_DEFAULT_DT   = 0.00001;
+// Default parameter values
+const double      C_DEFAULT_XMAX = 50.0;
+const double      C_DEFAULT_TMAX = 10.0;
+const double      C_DEFAULT_DX   = 0.1;
+const double      C_DEFAULT_DT   = 0.00001;
 const std::string C_DEFAULT_FILE = "kdv_out";
+
 
 static void usage(int argc, char *argv[])
 {
@@ -23,21 +25,16 @@ static void usage(int argc, char *argv[])
    fprintf(stderr, "\t--file <file>\t(default: %s)\n", C_DEFAULT_FILE.c_str());
 }
 
+
 int main(int argc, char *argv[])
 {
-   // The values below determine the region of interest.
-   double xmax = C_DEFAULT_XMAX;
-   double tmax = C_DEFAULT_TMAX;
-
-   // The values below control the accuracy of the calculations.
-   double dx = C_DEFAULT_DX;
-   double dt = C_DEFAULT_DT;
-
-   // Output file name prefix
+   double xmax      = C_DEFAULT_XMAX;
+   double tmax      = C_DEFAULT_TMAX;
+   double dx        = C_DEFAULT_DX;
+   double dt        = C_DEFAULT_DT;
    std::string file = C_DEFAULT_FILE;
 
    int c;
-
    while (1)
    {
       int option_index = 0;
@@ -67,9 +64,7 @@ int main(int argc, char *argv[])
             default: usage(argc, argv);
                      exit(EXIT_FAILURE);
          }
-      }
-      else
-      {
+      } else {
          usage(argc, argv);
          exit(EXIT_FAILURE);
       }
@@ -82,42 +77,15 @@ int main(int argc, char *argv[])
    std::cout << "dt   : " << std::setw(19) << std::setprecision(4) << dt << std::endl;
    std::cout << "file : " << file << std::endl;
 
-   //
-   // CUSTOMIZABLE AREA BEGINS HERE vvv
-   //
-
-   // This function defines the initial condition.
-   auto u0 = [&] (double x)
-   {
-      const double xmid = xmax/2.0;
-
-      // Temporary variable.
-      const double c = cosh((x-xmid) / 2.0);
-
-      return -0.5/(c*c);
-   };
-
-
-   //
-   // CUSTOMIZABLE AREA ENDS HERE ^^^
-   //
-
 
    const unsigned int nmax = xmax/dx + 0.5;  // Add 0.5 for rounding.
    const unsigned int mmax = tmax/dt + 0.5;  // Add 0.5 for rounding.
 
-   // Prepare initial condition.
-   // Make sure initial values are (approximately) periodic, even though the
-   // function u0() is not.
    dv u(nmax+1);
-   for (unsigned int n=0; n<=nmax; ++n)
-   {
-      const double x = n*dx;
-      u[n] = u0(x) + u0(x-xmax) + u0(x+xmax);
-   }
 
    KdvIntegrator kdvintegrator(mmax, nmax, dt, dx, file);
 
+   kdvintegrator.initialize(u);
    for (unsigned int m=0; m<=mmax; ++m)
    {
       const double t = m*dt;
