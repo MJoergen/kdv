@@ -4,10 +4,10 @@
 #include <getopt.h>
 #include "kdvintegrator.h"
 
-const double C_DEFAULT_XMAX = 100.0;
+const double C_DEFAULT_XMAX = 50.0;
 const double C_DEFAULT_TMAX = 10.0;
-const double C_DEFAULT_DX   = 0.05;
-const double C_DEFAULT_DT   = 0.000001;
+const double C_DEFAULT_DX   = 0.1;
+const double C_DEFAULT_DT   = 0.00001;
 const std::string C_DEFAULT_FILE = "kdv_out";
 
 static void usage(int argc, char *argv[])
