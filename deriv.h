@@ -1,5 +1,4 @@
 #include <vector>
-#include <iostream>
 
 // The functions in this block calculate the first, second, and third
 // derivative of a function sampled at equidistant points.

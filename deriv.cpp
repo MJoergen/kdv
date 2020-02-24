@@ -1,6 +1,3 @@
-#include <vector>
-#include <iostream>
-
 #include "deriv.h"
 
 const double twelvth = 1.0/12.0;

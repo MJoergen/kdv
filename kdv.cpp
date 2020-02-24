@@ -1,132 +1,95 @@
 #include <iostream>
-#include <fstream>
 #include <iomanip>
-#include <string>
 #include <math.h>
+#include <getopt.h>
+#include "kdvintegrator.h"
 
-#include "deriv.h"
+// Default parameter values
+const double      C_DEFAULT_XMAX = 50.0;
+const double      C_DEFAULT_TMAX = 10.0;
+const double      C_DEFAULT_DX   = 0.1;
+const double      C_DEFAULT_DT   = 0.00001;
+const std::string C_DEFAULT_FILE = "kdv_out";
 
 
-int main()
+static void usage(int argc, char *argv[])
 {
-   //
-   // CUSTOMIZABLE AREA BEGINS HERE vvv
-   //
-
-   // The values below determine the region of interest.
-   const double xmax = 100.0;
-   const double tmax = 10.0;
-
-   // The values below control the accuracy of the calculations.
-   const double dx = 0.05;
-   const double dt = 0.000001;
-
-   // This function defines the initial condition.
-   auto u0 = [&] (double x)
+   if (argc>0)
    {
-      const double xmid = xmax/2.0;
+      fprintf(stderr, "Usage: %s\n", argv[0]);
+   }
+   fprintf(stderr, "\t--xmax <xmax>\t(default: %f)\n", C_DEFAULT_XMAX);
+   fprintf(stderr, "\t--tmax <tmax>\t(default: %f)\n", C_DEFAULT_TMAX);
+   fprintf(stderr, "\t--dx   <dx>  \t(default: %f)\n", C_DEFAULT_DX);
+   fprintf(stderr, "\t--dt   <dt>  \t(default: %f)\n", C_DEFAULT_DT);
+   fprintf(stderr, "\t--file <file>\t(default: %s)\n", C_DEFAULT_FILE.c_str());
+}
 
-      // Temporary variable.
-      const double c = cosh((x-xmid) / 2.0);
 
-      return -0.5/(c*c);
-   };
+int main(int argc, char *argv[])
+{
+   double xmax      = C_DEFAULT_XMAX;
+   double tmax      = C_DEFAULT_TMAX;
+   double dx        = C_DEFAULT_DX;
+   double dt        = C_DEFAULT_DT;
+   std::string file = C_DEFAULT_FILE;
 
-   // This function defines the partial differential equation
-   auto calc_ut = [&] (dv& ut, const dv& u)
+   int c;
+   while (1)
    {
-      dv u1(u.size());
-      calc_deriv_1(u1, u);
-
-      calc_deriv_3(ut, u);
-      for (unsigned int n=0; n<u.size(); ++n)
+      int option_index = 0;
+      static struct option long_options[] =
       {
-         ut[n] = -ut[n]/(dx*dx*dx) + 6.0*u[n]*u1[n]/dx;
-      }
-   }; // calc_ut
+         {"xmax", required_argument, 0, 0},
+         {"tmax", required_argument, 0, 0},
+         {"dx",   required_argument, 0, 0},
+         {"dt",   required_argument, 0, 0},
+         {"file", required_argument, 0, 0},
+         {0,      0,                 0, 0}
+      };
 
-   // This function calculates the mass
-   auto calc_mass = [&] (const dv& u)
-   {
-      double sum = 0.0;
-      for (unsigned int n=0; n<u.size(); ++n)
+      c = getopt_long(argc, argv, "", long_options, &option_index);
+      if (c == -1)
+         break;
+
+      if (c == 0)
       {
-         sum += u[n];
+         switch (option_index)
+         {
+            case 0 : xmax = atof(optarg); break;
+            case 1 : tmax = atof(optarg); break;
+            case 2 : dx   = atof(optarg); break;
+            case 3 : dt   = atof(optarg); break;
+            case 4 : file = optarg; break;
+            default: usage(argc, argv);
+                     exit(EXIT_FAILURE);
+         }
+      } else {
+         usage(argc, argv);
+         exit(EXIT_FAILURE);
       }
-      return sum;
-   }; // calc_mass
+   } // end of while (1)
 
-   // This function calculates the momentum
-   auto calc_momentum = [&] (const dv& u)
-   {
-      double sum = 0.0;
-      for (unsigned int n=0; n<u.size(); ++n)
-      {
-         sum += u[n]*u[n];
-      }
-      return sum;
-   }; // calc_momentum
-
-   // Initial values of mass and momentum
-   const double exp_mass     = -2.0;
-   const double exp_momentum = 2.0/3.0;
-
-   // Output file name prefix
-   const std::string file_name_base = "kdv_out";
-
-   //
-   // CUSTOMIZABLE AREA ENDS HERE ^^^
-   //
+   std::cout << "Running KdV simulation with the following parameters:" << std::endl;
+   std::cout << "xmax : " << std::setw(19) << std::setprecision(4) << xmax << std::endl;
+   std::cout << "tmax : " << std::setw(19) << std::setprecision(4) << tmax << std::endl;
+   std::cout << "dx   : " << std::setw(19) << std::setprecision(4) << dx << std::endl;
+   std::cout << "dt   : " << std::setw(19) << std::setprecision(4) << dt << std::endl;
+   std::cout << "file : " << file << std::endl;
 
 
    const unsigned int nmax = xmax/dx + 0.5;  // Add 0.5 for rounding.
    const unsigned int mmax = tmax/dt + 0.5;  // Add 0.5 for rounding.
 
-   // Prepare initial condition.
-   // Make sure initial values are (approximately) periodic, even though the
-   // function u0() is not.
    dv u(nmax+1);
-   for (unsigned int n=0; n<=nmax; ++n)
-   {
-      const double x = n*dx;
-      u[n] = u0(x) + u0(x-xmax) + u0(x+xmax);
-   }
 
-   dv f(nmax+1);
-   dv utmp(nmax+1);
-   dv ftmp(nmax+1);
-   std::ofstream oflog(file_name_base + ".txt");
+   KdvIntegrator kdvintegrator(mmax, nmax, dt, dx, file);
+
+   kdvintegrator.initialize(u);
    for (unsigned int m=0; m<=mmax; ++m)
    {
       const double t = m*dt;
-      if ((m%(mmax/100)) == 0)
-      {
-         // Output error in conserved quantities.
-         oflog <<          std::setw(19) << std::setprecision(4) << t
-               << " , " << std::setw(19) << std::setprecision(4) << dx*calc_mass(u)     - exp_mass
-               << " , " << std::setw(19) << std::setprecision(4) << dx*calc_momentum(u) - exp_momentum
-               << std::endl;
-
-         std::ofstream ofs(file_name_base + std::to_string(t) + ".txt");
-         for (unsigned int n=0; n<=nmax; ++n)
-         {
-            const double x = n*dx;
-            ofs <<          std::setw(19) << std::setprecision(4) << x
-                << " , " << std::setw(19) << std::setprecision(4) << u[n] << std::endl;
-         }
-      }
-
-      // Heun's method.
-      calc_ut(f, u);
-      for (unsigned int n=0; n<=nmax; ++n)
-      {
-         utmp[n] = u[n] + dt*f[n];
-      }
-      calc_ut(ftmp, utmp);
-      for (unsigned int n=0; n<=nmax; ++n)
-      {
-         u[n] = u[n] + dt/2.0*(f[n]+ftmp[n]);
-      }
+      kdvintegrator.single_step(t, u);
    }
 
    return 0;
