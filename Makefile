@@ -1,4 +1,4 @@
-kdv: kdv.cpp deriv.cpp integrator.cpp
+kdv: kdv.cpp deriv.cpp integrator.cpp kdvintegrator.cpp
 	g++ -Wall -Wextra -O3 $^ -o $@
 
 test_deriv: test_deriv.cpp deriv.cpp
